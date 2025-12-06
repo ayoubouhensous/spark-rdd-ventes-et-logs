@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  namenode:
+    image: apache/hadoop:3.3.6
+    hostname: namenode
+    container_name: rdd-namenode
+    command: ["hdfs", "namenode"]
+    ports:
+      - "9870:9870"   # HDFS Web UI
+      - "8020:8020"   # HDFS RPC
+    env_file:
+      - ./config
+    environment:
+      HADOOP_HOME: "/opt/hadoop"
+      ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+    volumes:
+      - ./volumes/namenode:/data
+    networks:
+      - spark-network
+
+  datanode:
+    image: apache/hadoop:3.3.6
+    container_name: rdd-datanode
+    command: ["hdfs", "datanode"]
+    env_file:
+      - ./config
+    environment:
+      HADOOP_HOME: "/opt/hadoop"
+    volumes:
+      - ./volumes/datanode:/data
+    networks:
+      - spark-network
+
+  resourcemanager:
+    image: apache/hadoop:3.3.6
+    container_name: rdd-resourcemanager
+    hostname: resourcemanager
+    command: ["yarn", "resourcemanager"]
+    ports:
+      - "8088:8088"  # YARN Web UI
+    env_file:
+      - ./config
+    environment:
+      HADOOP_HOME: "/opt/hadoop"
+    networks:
+      - spark-network
+
+  nodemanager:
+    image: apache/hadoop:3.3.6
+    container_name: rdd-nodemanager
+    command: ["yarn", "nodemanager"]
+    env_file:
+      - ./config
+    environment:
+      HADOOP_HOME: "/opt/hadoop"
+    networks:
+      - spark-network
+
+  spark-master:
+    image: spark:latest
+    hostname: spark-master
+    container_name: spark-master
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master",
+              "--host", "spark-master", "--port", "7077", "--webui-port", "8080"]
+    ports:
+      - "7077:7077"  # Spark Master port
+      - "8080:8080"  # Spark Web UI
+    depends_on:
+      - namenode
+    networks:
+      - spark-network
+
+  spark-worker-1:
+    image: spark:latest
+    hostname: spark-worker-1
+    container_name: spark-worker-1
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker",
+              "spark://spark-master:7077"]
+    depends_on:
+      - spark-master
+    networks:
+      - spark-network
+
+networks:
+  spark-network:
+    driver: bridge
+
