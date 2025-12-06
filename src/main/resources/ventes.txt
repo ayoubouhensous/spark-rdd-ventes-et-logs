@@ -1,0 +1,5 @@
+2025-01-01 Casablanca Laptop 1000
+2025-01-02 Rabat Smartphone 500
+2025-01-01 Casablanca Smartphone 300
+2025-01-03 Marrakech Laptop 1200
+2024-12-31 Rabat Laptop 800
