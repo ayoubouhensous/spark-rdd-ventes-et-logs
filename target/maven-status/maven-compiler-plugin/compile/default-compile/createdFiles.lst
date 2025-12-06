@@ -1,2 +1,4 @@
 com/rdd/spark/App.class
 com/rdd/spark/TotalVentesParVille.class
+com/rdd/spark/LogAnalysis.class
+com/rdd/spark/LogEntry.class
